@@ -1,7 +1,9 @@
 """Relabel existing QNN exports with reserved mate bands, without an engine.
 
 Reads the original rich split files; writes only derived input/output JSON
-arrays and their conversion manifest. No generation or analysis is performed.
+arrays and their conversion manifest. Optional grouped stratification changes
+the derived split membership without changing engine records or score labels.
+No generation or analysis is performed.
 """
 
 import argparse
@@ -13,8 +15,10 @@ import math
 from pathlib import Path
 import tempfile
 
+from training.splits import METHOD as STRATIFIED_METHOD, assign_families
 
-ROOT = Path(__file__).resolve().parent
+
+ROOT = Path(__file__).resolve().parents[1]
 SPLITS = ("train", "validation", "test")
 MAPPING_VERSION = "mate-bands-v1"
 ORDINARY_LIMIT = 0.75
@@ -101,7 +105,20 @@ def distribution(rows: list[dict], kinds: list[str]) -> dict:
     bands.update(score_band(score) for score in scores)
     categories = Counter({name: 0 for name in KINDS})
     categories.update(kinds)
+    groups = {"black_advantage": bands["black_mate"] + bands["black_ordinary"],
+              "near_equal": bands["near_equal"],
+              "white_advantage": bands["white_mate"] + bands["white_ordinary"]}
+    materials = Counter()
+    for row in rows:
+        bits = row["input"]
+        material = {("0", "0"): "KRvKR", ("0", "1"): "KRvK",
+                    ("1", "0"): "KvKR", ("1", "1"): "KvK"}[(bits[6], bits[19])]
+        materials[material] += 1
     return {"positions": len(rows), "categories": dict(categories), "score_bands": dict(bands),
+            "score_groups": groups,
+            "score_group_percentages": {key: count * 100 / len(rows) if rows else 0
+                                        for key, count in groups.items()},
+            "material_counts": dict(materials),
             "minimum": min(scores) if scores else None, "maximum": max(scores) if scores else None,
             "exact_endpoint_count": sum(abs(score) == 1 for score in scores)}
 
@@ -171,7 +188,43 @@ def validate_conversion(source_rows: dict, converted: dict, kinds: dict) -> dict
             "mirror_signs": "passed", "bands_and_endpoints": "passed", "family_overlap": 0}
 
 
-def translate(source_dir: Path, output_dir: Path) -> dict:
+def stratify(source_rows: dict, converted: dict, kinds: dict, seed: int):
+    families = defaultdict(Counter)
+    entries = []
+    for split in SPLITS:
+        for source, row, kind in zip(source_rows[split], converted[split], kinds[split]):
+            families[source["family_id"]][(source["material_class"], score_band(row["output"]))] += 1
+            entries.append((source, row, kind))
+    assignment, metadata = assign_families(families, seed)
+    new_source = {split: [] for split in SPLITS}
+    new_rows = {split: [] for split in SPLITS}
+    new_kinds = {split: [] for split in SPLITS}
+    for source, row, kind in sorted(entries, key=lambda entry: entry[1]["input"]):
+        split = assignment[source["family_id"]]
+        new_source[split].append(source)
+        new_rows[split].append(row)
+        new_kinds[split].append(kind)
+    return new_source, new_rows, new_kinds, metadata
+
+
+def split_quality(converted: dict, kinds: dict) -> dict:
+    all_rows = [row for split in SPLITS for row in converted[split]]
+    all_kinds = [kind for split in SPLITS for kind in kinds[split]]
+    overall = distribution(all_rows, all_kinds)
+    quality = {}
+    for split in SPLITS:
+        part = distribution(converted[split], kinds[split])
+        quality[split] = {}
+        for field in ("score_groups", "score_bands", "material_counts"):
+            deviations = [abs(part[field].get(key, 0) / part["positions"]
+                              - count / overall["positions"]) * 100
+                          for key, count in overall[field].items()] if part["positions"] else []
+            quality[split][f"max_{field}_deviation_percentage_points"] = max(deviations, default=None)
+    return quality
+
+
+def translate(source_dir: Path, output_dir: Path, *, stratify_splits: bool | None = None,
+              seed: int | None = None) -> dict:
     source_dir, output_dir = source_dir.resolve(), output_dir.resolve()
     if source_dir == output_dir:
         raise ValueError("Output directory must differ from the original data directory")
@@ -179,6 +232,13 @@ def translate(source_dir: Path, output_dir: Path) -> dict:
     source_manifest_bytes = source_manifest_path.read_bytes()
     source_manifest = json.loads(source_manifest_bytes)
     protected = {source_manifest_path: hashlib.sha256(source_manifest_bytes).hexdigest()}
+    old_manifest_path = output_dir / "manifest.json"
+    old_manifest = json.loads(old_manifest_path.read_text()) if old_manifest_path.exists() else {}
+    old_split = old_manifest.get("split", {})
+    if stratify_splits is None:
+        stratify_splits = old_split.get("method") == STRATIFIED_METHOD
+    split_seed = seed if seed is not None else old_split.get("seed", 42)
+    previous_rows = {}
     source_rows, converted, kinds, sources = {}, {}, {}, {}
     for split in SPLITS:
         path = source_dir / f"{split}.jsonl.gz"
@@ -199,11 +259,31 @@ def translate(source_dir: Path, output_dir: Path) -> dict:
         previous_path = output_dir / f"{split}.json"
         if previous_path.exists():
             previous = json.loads(previous_path.read_text())
-            if len(previous) != len(rows) or any(old.get("input") != new["input"] for old, new in zip(previous, rows)):
+            previous_rows[split] = previous
+            if not stratify_splits and (len(previous) != len(rows) or any(
+                    old.get("input") != new["input"] for old, new in zip(previous, rows))):
                 raise ValueError(f"Existing QNN input order does not match the source: {previous_path}")
         source_rows[split], converted[split], kinds[split] = original, rows, categories
         sources[split] = {"path": path.name, "sha256": digest, "positions": len(original)}
     validation = validate_conversion(source_rows, converted, kinds)
+    split_metadata = {"method": "source", "membership": "preserved from original engine records"}
+    if stratify_splits:
+        if previous_rows:
+            if set(previous_rows) != set(SPLITS):
+                raise ValueError("Cannot stratify partial QNN exports; all three files must be present")
+            old_inputs = Counter(row["input"] for rows in previous_rows.values() for row in rows)
+            new_inputs = Counter(row["input"] for rows in converted.values() for row in rows)
+            if old_inputs != new_inputs:
+                raise ValueError("Stratification must preserve the complete existing input set")
+            if old_manifest.get("mapping_version") == MAPPING_VERSION:
+                old_pairs = Counter((row["input"], row["output"]) for rows in previous_rows.values() for row in rows)
+                new_pairs = Counter((row["input"], row["output"]) for rows in converted.values() for row in rows)
+                if old_pairs != new_pairs:
+                    raise ValueError("Stratification must preserve existing input/target pairs")
+        source_rows, converted, kinds, split_metadata = stratify(source_rows, converted, kinds, split_seed)
+        validation = validate_conversion(source_rows, converted, kinds)
+        validation["inputs_order_and_splits"] = "regrouped deterministically; input/target pairs preserved"
+    split_metadata["distribution_quality"] = split_quality(converted, kinds)
     baselines = baseline_errors(source_rows, converted)
     all_rows = [row for split in SPLITS for row in converted[split]]
     all_kinds = [kind for split in SPLITS for kind in kinds[split]]
@@ -221,6 +301,9 @@ def translate(source_dir: Path, output_dir: Path) -> dict:
                              "near_equal": "[-0.2,0.2]", "white_ordinary": "(0.2,0.75]", "white_mate": "(0.75,1]"},
         "sources": sources, "source_manifest_sha256": protected[source_manifest_path],
         "converter_sha256": sha256_file(Path(__file__)),
+        "split": split_metadata,
+        "score_group_definitions": {"black_advantage": "[-1,-0.2)", "near_equal": "[-0.2,0.2]",
+                                    "white_advantage": "(0.2,1]"},
         "distribution": distribution(all_rows, all_kinds), "validation": validation,
         "baselines": baselines,
         "limitations": ["Mate distances are engine-reported, not guaranteed globally shortest.",
@@ -257,13 +340,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-dir", type=Path, default=ROOT / "data/king_rook")
     parser.add_argument("--output-dir", type=Path, help="Default: SOURCE_DIR/qnn")
+    parser.add_argument("--stratify", action="store_true", default=None,
+                        help="Re-split whole families 80/10/10, preserving material and score distributions")
+    parser.add_argument("--seed", type=int, help="Stratification seed (default: existing seed or 42)")
     args = parser.parse_args()
     try:
-        manifest = translate(args.source_dir, args.output_dir or args.source_dir / "qnn")
+        manifest = translate(args.source_dir, args.output_dir or args.source_dir / "qnn",
+                             stratify_splits=args.stratify, seed=args.seed)
     except (ValueError, OSError, KeyError, TypeError) as error:
         parser.exit(1, f"Translation failed: {error}\n")
     print(json.dumps({"mapping_version": manifest["mapping_version"],
-                      **manifest["distribution"], "baselines": manifest["baselines"]}, indent=2))
+                      **manifest["distribution"], "split": manifest["split"],
+                      "baselines": manifest["baselines"]}, indent=2))
 
 
 if __name__ == "__main__":

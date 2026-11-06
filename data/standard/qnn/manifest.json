@@ -1,0 +1,311 @@
+{
+  "analysis_configuration": {
+    "binary_sha256": "8eed61129d1493c5d1f2fd9323f0c54c47ac49319911fbde18c6b9c87e8b13c5",
+    "clear_search_state_per_position": true,
+    "encoding_sha256": "af2b615c5550911f58afbc8ef507373cf974e4ea328f1fbedeaacc03c3d3fcf8",
+    "generator_sha256": "c115ce957680057600355eb8a470677180a91573096a43dfb37f96b1edcf3ea3",
+    "hash_mib": 32,
+    "mapping_sha256": "e9ab192b05f22ee5bcdb3bdd1f4aa6ea67ffa429fc72fc4c143d09c202a3d077",
+    "max_plies": 180,
+    "nodes": 10000,
+    "positions": 50000,
+    "schema_version": 1,
+    "seed": 42,
+    "syzygy_path": "",
+    "threads_per_engine": 1,
+    "workers": 4
+  },
+  "baselines": {
+    "test": {
+      "zero_prediction_mse": 0.39005177156356946
+    },
+    "validation": {
+      "zero_prediction_mse": 0.38929577636493357
+    }
+  },
+  "distribution": {
+    "castling_rights_count": 15110,
+    "categories": {
+      "centipawn": 39988,
+      "checkmate": 2138,
+      "nonterminal_mate": 7862,
+      "terminal_draw": 12
+    },
+    "en_passant_count": 2108,
+    "exact_endpoint_count": 2138,
+    "phase_counts": {
+      "endgame": 11954,
+      "middlegame": 26166,
+      "opening": 11880
+    },
+    "positions": 50000,
+    "post_promotion_count": 4974,
+    "post_promotion_types": {
+      "bishop": 720,
+      "knight": 838,
+      "queen": 3422,
+      "rook": 686
+    },
+    "score_bins": {
+      "black_large": 7500,
+      "black_mate": 5000,
+      "black_moderate": 7500,
+      "near_equal": 10000,
+      "white_large": 7500,
+      "white_mate": 5000,
+      "white_moderate": 7500
+    },
+    "turn_counts": {
+      "black": 25000,
+      "white": 25000
+    }
+  },
+  "encoding": {
+    "bits": 265,
+    "piece_codes": {
+      "black_bishop": 9,
+      "black_king": 12,
+      "black_knight": 8,
+      "black_pawn": 7,
+      "black_queen": 11,
+      "black_rook": 10,
+      "empty": 0,
+      "white_bishop": 3,
+      "white_king": 6,
+      "white_knight": 2,
+      "white_pawn": 1,
+      "white_queen": 5,
+      "white_rook": 4
+    },
+    "square_order": "a1, b1, ... h1, a2, ... h8",
+    "type": "square-board"
+  },
+  "engine": {
+    "author": "the Stockfish developers (see AUTHORS file)",
+    "name": "Stockfish 19"
+  },
+  "engine_provenance": {
+    "binary_sha256": "8eed61129d1493c5d1f2fd9323f0c54c47ac49319911fbde18c6b9c87e8b13c5",
+    "release": "https://github.com/official-stockfish/Stockfish/releases/tag/sf_19",
+    "source": "supplied"
+  },
+  "files": {
+    "test": {
+      "bytes": 1611731,
+      "castling_rights_count": 1358,
+      "categories": {
+        "centipawn": 3994,
+        "checkmate": 196,
+        "nonterminal_mate": 804,
+        "terminal_draw": 6
+      },
+      "en_passant_count": 228,
+      "exact_endpoint_count": 196,
+      "path": "test.json",
+      "phase_counts": {
+        "endgame": 1130,
+        "middlegame": 2632,
+        "opening": 1238
+      },
+      "positions": 5000,
+      "post_promotion_count": 362,
+      "post_promotion_types": {
+        "bishop": 70,
+        "knight": 62,
+        "queen": 224,
+        "rook": 56
+      },
+      "score_bins": {
+        "black_large": 750,
+        "black_mate": 500,
+        "black_moderate": 750,
+        "near_equal": 1000,
+        "white_large": 750,
+        "white_mate": 500,
+        "white_moderate": 750
+      },
+      "sha256": "4f9026860586f76f46cebbad7e4c65ce0d6f831f90853f9507b0eca38fbb1151",
+      "turn_counts": {
+        "black": 2500,
+        "white": 2500
+      }
+    },
+    "train": {
+      "bytes": 12890762,
+      "castling_rights_count": 12354,
+      "categories": {
+        "centipawn": 31994,
+        "checkmate": 1720,
+        "nonterminal_mate": 6280,
+        "terminal_draw": 6
+      },
+      "en_passant_count": 1662,
+      "exact_endpoint_count": 1720,
+      "path": "train.json",
+      "phase_counts": {
+        "endgame": 9620,
+        "middlegame": 20952,
+        "opening": 9428
+      },
+      "positions": 40000,
+      "post_promotion_count": 4120,
+      "post_promotion_types": {
+        "bishop": 622,
+        "knight": 672,
+        "queen": 2882,
+        "rook": 524
+      },
+      "score_bins": {
+        "black_large": 6000,
+        "black_mate": 4000,
+        "black_moderate": 6000,
+        "near_equal": 8000,
+        "white_large": 6000,
+        "white_mate": 4000,
+        "white_moderate": 6000
+      },
+      "sha256": "fee170e5835f6d8e640390b5ce97ca21c6a80d11e014da7f4ae1e546767a50a1",
+      "turn_counts": {
+        "black": 20000,
+        "white": 20000
+      }
+    },
+    "validation": {
+      "bytes": 1611317,
+      "castling_rights_count": 1398,
+      "categories": {
+        "centipawn": 4000,
+        "checkmate": 222,
+        "nonterminal_mate": 778
+      },
+      "en_passant_count": 218,
+      "exact_endpoint_count": 222,
+      "path": "validation.json",
+      "phase_counts": {
+        "endgame": 1204,
+        "middlegame": 2582,
+        "opening": 1214
+      },
+      "positions": 5000,
+      "post_promotion_count": 492,
+      "post_promotion_types": {
+        "bishop": 28,
+        "knight": 104,
+        "queen": 316,
+        "rook": 106
+      },
+      "score_bins": {
+        "black_large": 750,
+        "black_mate": 500,
+        "black_moderate": 750,
+        "near_equal": 1000,
+        "white_large": 750,
+        "white_mate": 500,
+        "white_moderate": 750
+      },
+      "sha256": "84aa71d3595c704584640c0a62572d387fbeafd23ea26ea34e9e65a443fca2b9",
+      "turn_counts": {
+        "black": 2500,
+        "white": 2500
+      }
+    }
+  },
+  "limitations": [
+    "Fixed-node engine estimates, not tablebase proofs or win probabilities.",
+    "Mate distances are engine-reported, not guaranteed shortest.",
+    "Synthetic mixed-strength games with quotas, not a human-game distribution.",
+    "Repetition history and move clocks are outside this input format.",
+    "The existing QNN prototype accepts 35-bit inputs; a 265-bit model is separate work."
+  ],
+  "mapping_version": "mate-bands-v1",
+  "sampling": {
+    "augmentation": "color swap plus vertical reflection; score negated",
+    "candidate_interval_plies": 2,
+    "candidate_pairs": 56833,
+    "completed_games": 1284,
+    "history_dependent_draws": false,
+    "method": "legal opening prefixes followed by engine/random legal play",
+    "promotions": "continue play; queen/rook/bishop/knight weights 7/1/1/1",
+    "random_move_probabilities": {
+      "large": [
+        0.02,
+        0.25
+      ],
+      "mate": [
+        0.01,
+        0.4
+      ],
+      "moderate": [
+        0.04,
+        0.12
+      ],
+      "near_equal": [
+        0.015,
+        0.015
+      ]
+    }
+  },
+  "schema_version": 1,
+  "score_bins": {
+    "large": "0.6 < abs(score) <= 0.75",
+    "mate": "0.75 < abs(score) <= 1",
+    "moderate": "0.2 < abs(score) <= 0.6",
+    "near_equal": "[-0.2, 0.2]"
+  },
+  "seed": 42,
+  "software": {
+    "chess": "1.11.2",
+    "python": "3.12.14"
+  },
+  "source_manifest_sha256": "ee4435307109fabcae88724d6d033d8d3bbaa323a8d4dcc7a3f82ebdb5413a68",
+  "split": {
+    "color_mirrors_together": true,
+    "method": "quota-stratified-games-v1",
+    "placement_family_overlap": 0,
+    "proportions": [
+      0.8,
+      0.1,
+      0.1
+    ],
+    "requested_pair_quotas": {
+      "test": {
+        "large": 750,
+        "mate": 500,
+        "moderate": 750,
+        "near_equal": 500
+      },
+      "train": {
+        "large": 6000,
+        "mate": 4000,
+        "moderate": 6000,
+        "near_equal": 4000
+      },
+      "validation": {
+        "large": 750,
+        "mate": 500,
+        "moderate": 750,
+        "near_equal": 500
+      }
+    },
+    "whole_games": true
+  },
+  "target": {
+    "checkmate": "signed endpoint",
+    "cp_formula": "0.75 * tanh(cp / 400)",
+    "mate_formula": "sign(m) * (0.75 + 0.25 * 0.9 ** abs(m))",
+    "perspective": "white",
+    "terminal_draw": 0
+  },
+  "validation": {
+    "encoding_round_trips": "passed",
+    "game_overlap": 0,
+    "games": 1239,
+    "legal_game_replays": "passed",
+    "mirror_pairs": 25000,
+    "placement_family_overlap": 0,
+    "raw_score_mapping": "passed",
+    "records_checked": 50000,
+    "score_quotas": "passed",
+    "unique_placements": 25000
+  }
+}

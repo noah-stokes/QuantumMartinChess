@@ -68,8 +68,8 @@ test records have no weights and are evaluated unweighted.
 Run from the repository root:
 
 ```sh
-.venv/bin/python generate_training_data.py
-.venv/bin/python translate_qnn_data.py
+.venv/bin/python -m training.generate_rook_endgame
+.venv/bin/python -m training.translate_qnn_data
 ```
 
 The generator uses Stockfish 19 with 10,000 nodes per analyzed position,

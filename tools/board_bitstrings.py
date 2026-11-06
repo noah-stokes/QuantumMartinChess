@@ -1,4 +1,8 @@
-"""Store chess positions with fixed original-piece slots.
+"""Store chess positions as square codes or fixed original-piece slots.
+
+SQUARE_BOARD uses 265 bits: 64 four-bit square codes, then nine state bits.
+Square order is a1, b1, ... h8. Codes are empty=0, White P/N/B/R/Q/K=1..6,
+Black P/N/B/R/Q/K=7..12; codes 13..15 are invalid. Promotions are supported.
 
 Standard positions use 231 bits. KING_ROOK_VS_KING positions use 28 bits:
 White king [6], White rook [captured][6], Black king [6], game state [9].
@@ -19,8 +23,8 @@ squares, then square order (bishops retain their original square color).
 Retain the Board's move stack when encoding successive positions. Known
 promotions are unsupported; an unmarked FEN can hide past promotions.
 
-Encode legal moves: python3 legal_moves.py | python3 board_bitstrings.py
-Decode one board:  python3 board_bitstrings.py --decode BITSTRING
+Encode legal moves: python3 -m tools.legal_moves | python3 -m tools.board_bitstrings
+Decode one board:  python3 -m tools.board_bitstrings --decode BITSTRING
 """
 
 import argparse
@@ -30,7 +34,7 @@ from typing import Optional, Union
 
 import chess
 
-from position_types import PositionType, _validate_piece_set, _validate_position_type
+from tools.position_types import PositionType, _validate_piece_set, _validate_position_type
 
 
 # Keep the original constants as aliases for the default standard format.
@@ -79,7 +83,7 @@ def _validate_board(board: chess.Board, position_type: PositionType) -> None:
     _validate_piece_set(board, position_type)
     if board.chess960:
         raise ValueError("Chess960 positions are unsupported")
-    if board.promoted:
+    if board.promoted and position_type != PositionType.SQUARE_BOARD:
         raise ValueError(
             f"Promoted positions are unsupported by the {position_type.bitstring_length}-bit format"
         )
@@ -163,14 +167,20 @@ def _tracked_slot_positions(board: chess.Board, position_type: PositionType) -> 
 def board_to_bitstring(
     board: chess.Board, position_type: PositionType = PositionType.STANDARD,
 ) -> str:
-    """Return a complete position in the selected 231-, 28-, or 35-bit format."""
+    """Return a complete position in the selected 265-, 231-, 28-, or 35-bit format."""
     _validate_board(board, position_type)
-    positions = _tracked_slot_positions(board, position_type)
     chunks = []
-    for (_, piece_type, _), square in zip(position_type.piece_slots, positions):
-        if piece_type != chess.KING:
-            chunks.append("1" if square is None else "0")
-        chunks.append(format(square if square is not None else 0, "06b"))
+    if position_type == PositionType.SQUARE_BOARD:
+        for square in chess.SQUARES:
+            piece = board.piece_at(square)
+            code = 0 if piece is None else piece.piece_type + (0 if piece.color else 6)
+            chunks.append(format(code, "04b"))
+    else:
+        positions = _tracked_slot_positions(board, position_type)
+        for (_, piece_type, _), square in zip(position_type.piece_slots, positions):
+            if piece_type != chess.KING:
+                chunks.append("1" if square is None else "0")
+            chunks.append(format(square if square is not None else 0, "06b"))
     chunks.append("0" if board.turn == chess.WHITE else "1")
     chunks.extend(
         "1" if has_right(color) else "0"
@@ -194,6 +204,35 @@ def bitstring_to_board(
     ):
         raise ValueError(f"Expected exactly {position_type.bitstring_length} bits (only 0 and 1)")
 
+    if position_type == PositionType.SQUARE_BOARD:
+        board = chess.Board(None)
+        for square in chess.SQUARES:
+            code = int(bitstring[square * 4:square * 4 + 4], 2)
+            if code > 12:
+                raise ValueError("Square piece codes 13-15 are undefined")
+            if code:
+                board.set_piece_at(square, chess.Piece((code - 1) % 6 + 1, code <= 6))
+        offset = 256
+    else:
+        return _decode_slot_board(bitstring, position_type)
+    _decode_state(board, bitstring, offset)
+    _validate_board(board, position_type)
+    return board
+
+
+def _decode_state(board: chess.Board, bitstring: str, offset: int) -> None:
+    board.turn = chess.WHITE if bitstring[offset] == "0" else chess.BLACK
+    for flag, rook_square in zip(bitstring[offset + 1:offset + 5], _CASTLING_ROOKS):
+        if flag == "1":
+            board.castling_rights |= chess.BB_SQUARES[rook_square]
+    ep_file = int(bitstring[offset + 5:offset + 9], 2)
+    if ep_file > 8:
+        raise ValueError("En passant must be 0000 (none) or 0001-1000 (files a-h)")
+    if ep_file:
+        board.ep_square = chess.square(ep_file - 1, 5 if board.turn == chess.WHITE else 2)
+
+
+def _decode_slot_board(bitstring: str, position_type: PositionType) -> chess.Board:
     board = _SlotBoard(None)
     positions: list[Optional[int]] = []
     offset = 0
@@ -216,15 +255,7 @@ def bitstring_to_board(
         board.set_piece_at(square, chess.Piece(piece_type, color))
         positions.append(square)
 
-    board.turn = chess.WHITE if bitstring[offset] == "0" else chess.BLACK
-    for flag, rook_square in zip(bitstring[offset + 1:offset + 5], _CASTLING_ROOKS):
-        if flag == "1":
-            board.castling_rights |= chess.BB_SQUARES[rook_square]
-    ep_file = int(bitstring[offset + 5:offset + 9], 2)
-    if ep_file > 8:
-        raise ValueError("En passant must be 0000 (none) or 0001-1000 (files a-h)")
-    if ep_file:
-        board.ep_square = chess.square(ep_file - 1, 5 if board.turn == chess.WHITE else 2)
+    _decode_state(board, bitstring, offset)
     _validate_board(board, position_type)
     board._slot_seed = tuple(positions)
     board._slot_position_type = position_type
@@ -287,7 +318,7 @@ if __name__ == "__main__":
         if args.decode is not None:
             result = decode_bitstring(args.decode, position_type)
         else:
-            if args.fen is None and position_type != PositionType.STANDARD:
+            if args.fen is None and position_type not in (PositionType.STANDARD, PositionType.SQUARE_BOARD):
                 parser.error("An explicit FEN is required for reduced position types")
             if sys.stdin.isatty():
                 parser.error("Pipe the JSON output from legal_moves.py into this script")

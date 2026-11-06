@@ -9,23 +9,23 @@
   "baselines": {
     "scope": "unweighted converted targets; compare only within the same mapping version",
     "test": {
-      "material_mean_mse": 0.10089661602821566,
-      "positions": 5122,
-      "zero_prediction_mse": 0.15648775049497238
+      "material_mean_mse": 0.09948564638818704,
+      "positions": 5000,
+      "zero_prediction_mse": 0.15561315702830847
     },
     "training_material_means": {
-      "KRvK": 0.5920615408234758,
+      "KRvK": 0.592110886035748,
       "KRvKR": 0.0,
       "KvK": 0.0,
-      "KvKR": -0.5920615408234758
+      "KvKR": -0.592110886035748
     },
     "validation": {
-      "material_mean_mse": 0.10040662486112546,
-      "positions": 4922,
-      "zero_prediction_mse": 0.1572832839730427
+      "material_mean_mse": 0.09977811828557877,
+      "positions": 5000,
+      "zero_prediction_mse": 0.1556714791246479
     }
   },
-  "converter_sha256": "901db8cfa9a80dc605f3509c6c4963870cfaf48a9266adc60217722a23607be3",
+  "converter_sha256": "e9ab192b05f22ee5bcdb3bdd1f4aa6ea67ffa429fc72fc4c143d09c202a3d077",
   "distribution": {
     "categories": {
       "centipawn": 46898,
@@ -34,6 +34,12 @@
       "terminal_draw": 2000
     },
     "exact_endpoint_count": 36,
+    "material_counts": {
+      "KRvK": 4000,
+      "KRvKR": 40000,
+      "KvK": 2000,
+      "KvKR": 4000
+    },
     "maximum": 1.0,
     "minimum": -1.0,
     "positions": 50000,
@@ -43,74 +49,132 @@
       "near_equal": 30518,
       "white_mate": 551,
       "white_ordinary": 9190
+    },
+    "score_group_percentages": {
+      "black_advantage": 19.482,
+      "near_equal": 61.036,
+      "white_advantage": 19.482
+    },
+    "score_groups": {
+      "black_advantage": 9741,
+      "near_equal": 30518,
+      "white_advantage": 9741
     }
   },
   "files": {
     "test": {
-      "bytes": 472474,
+      "bytes": 460057,
       "categories": {
-        "centipawn": 4860,
-        "checkmate": 8,
-        "nonterminal_mate": 118,
-        "terminal_draw": 136
+        "centipawn": 4690,
+        "checkmate": 4,
+        "nonterminal_mate": 106,
+        "terminal_draw": 200
       },
-      "exact_endpoint_count": 8,
+      "exact_endpoint_count": 4,
+      "material_counts": {
+        "KRvK": 402,
+        "KRvKR": 3996,
+        "KvK": 200,
+        "KvKR": 402
+      },
       "maximum": 1.0,
       "minimum": -1.0,
       "path": "test.json",
-      "positions": 5122,
+      "positions": 5000,
       "score_bands": {
-        "black_mate": 63,
-        "black_ordinary": 934,
-        "near_equal": 3128,
-        "white_mate": 63,
-        "white_ordinary": 934
+        "black_mate": 55,
+        "black_ordinary": 919,
+        "near_equal": 3052,
+        "white_mate": 55,
+        "white_ordinary": 919
       },
-      "sha256": "f9c4052d4f4b90185f85491e00af1ff5810db6ae15c0d6622ebdcae7644e68f3"
+      "score_group_percentages": {
+        "black_advantage": 19.48,
+        "near_equal": 61.04,
+        "white_advantage": 19.48
+      },
+      "score_groups": {
+        "black_advantage": 974,
+        "near_equal": 3052,
+        "white_advantage": 974
+      },
+      "sha256": "bb44b685754d2a7fc4af598fb34c9f55f0a7a098886d8eac7c2b6bca309514f2"
     },
     "train": {
-      "bytes": 3676709,
+      "bytes": 3683160,
       "categories": {
-        "centipawn": 37370,
+        "centipawn": 37518,
         "checkmate": 26,
-        "nonterminal_mate": 852,
-        "terminal_draw": 1708
+        "nonterminal_mate": 858,
+        "terminal_draw": 1598
       },
       "exact_endpoint_count": 26,
+      "material_counts": {
+        "KRvK": 3198,
+        "KRvKR": 32006,
+        "KvK": 1598,
+        "KvKR": 3198
+      },
       "maximum": 1.0,
       "minimum": -1.0,
       "path": "train.json",
-      "positions": 39956,
+      "positions": 40000,
       "score_bands": {
-        "black_mate": 439,
-        "black_ordinary": 7329,
-        "near_equal": 24420,
-        "white_mate": 439,
-        "white_ordinary": 7329
+        "black_mate": 442,
+        "black_ordinary": 7351,
+        "near_equal": 24414,
+        "white_mate": 442,
+        "white_ordinary": 7351
       },
-      "sha256": "748b6115eba874ef09f35bf996866decf2a1cde0caa63835f05072561b28c40a"
+      "score_group_percentages": {
+        "black_advantage": 19.4825,
+        "near_equal": 61.035,
+        "white_advantage": 19.4825
+      },
+      "score_groups": {
+        "black_advantage": 7793,
+        "near_equal": 24414,
+        "white_advantage": 7793
+      },
+      "sha256": "b1a7fced467b437f81c260c1f21f0f65cd3e089f8c9fef7c7ad001f3a22b1655"
     },
     "validation": {
-      "bytes": 454310,
+      "bytes": 460276,
       "categories": {
-        "centipawn": 4668,
-        "checkmate": 2,
-        "nonterminal_mate": 96,
-        "terminal_draw": 156
+        "centipawn": 4690,
+        "checkmate": 6,
+        "nonterminal_mate": 102,
+        "terminal_draw": 202
       },
-      "exact_endpoint_count": 2,
+      "exact_endpoint_count": 6,
+      "material_counts": {
+        "KRvK": 400,
+        "KRvKR": 3998,
+        "KvK": 202,
+        "KvKR": 400
+      },
       "maximum": 1.0,
       "minimum": -1.0,
       "path": "validation.json",
-      "positions": 4922,
+      "positions": 5000,
       "score_bands": {
-        "black_mate": 49,
-        "black_ordinary": 927,
-        "near_equal": 2970,
-        "white_mate": 49,
-        "white_ordinary": 927
+        "black_mate": 54,
+        "black_ordinary": 920,
+        "near_equal": 3052,
+        "white_mate": 54,
+        "white_ordinary": 920
       },
-      "sha256": "676398aa43a8fac08d13e0257b7fe0d35891b7a7ed230750aadc1a04abe13a0e"
+      "score_group_percentages": {
+        "black_advantage": 19.48,
+        "near_equal": 61.04,
+        "white_advantage": 19.48
+      },
+      "score_groups": {
+        "black_advantage": 974,
+        "near_equal": 3052,
+        "white_advantage": 974
+      },
+      "sha256": "134a12d0a56c4b66518538932c0fbe361adb174029a4635af4211782d1ed8e75"
     }
   },
   "limitations": [
@@ -135,6 +199,11 @@
     "input": "35-character binary string",
     "output": "White-perspective float in [-1,1]"
   },
+  "score_group_definitions": {
+    "black_advantage": "[-1,-0.2)",
+    "near_equal": "[-0.2,0.2]",
+    "white_advantage": "(0.2,1]"
+  },
   "source_manifest_sha256": "e3a2e601e62a30925410363b3d0db0aef63cf2306cf33e6486ad3e449caec107",
   "sources": {
     "test": {
@@ -153,11 +222,55 @@
       "sha256": "5d3669c4940b05be12e1b3459c15b5ab5afec1e523b67df047397d784ae38095"
     }
   },
+  "split": {
+    "actual_rows": {
+      "test": 5000,
+      "train": 40000,
+      "validation": 5000
+    },
+    "distribution_quality": {
+      "test": {
+        "max_material_counts_deviation_percentage_points": 0.08000000000000229,
+        "max_score_bands_deviation_percentage_points": 0.004000000000004,
+        "max_score_groups_deviation_percentage_points": 0.004000000000004
+      },
+      "train": {
+        "max_material_counts_deviation_percentage_points": 0.014999999999998348,
+        "max_score_bands_deviation_percentage_points": 0.0030000000000000512,
+        "max_score_groups_deviation_percentage_points": 0.0010000000000065512
+      },
+      "validation": {
+        "max_material_counts_deviation_percentage_points": 0.0400000000000067,
+        "max_score_bands_deviation_percentage_points": 0.02199999999999997,
+        "max_score_groups_deviation_percentage_points": 0.004000000000004
+      }
+    },
+    "exact_target_rows": true,
+    "families": 23742,
+    "family_policy": "D4 symmetries, color swaps, and turn variants stay together",
+    "family_size_gcd": 2,
+    "histogram_strata": 30,
+    "method": "group-stratified-v1",
+    "proportions": {
+      "test": 0.1,
+      "train": 0.8,
+      "validation": 0.1
+    },
+    "seed": 42,
+    "size_balancing_moves": 5,
+    "splitter_sha256": "cf9c3d84a6aa2ea16d9f93f9300a07ec3966a8b8291fb3e25a45ccfa4ef72762",
+    "stratification": "material class and five mate-band score bins, grouped by family_id",
+    "target_rows": {
+      "test": 5000,
+      "train": 40000,
+      "validation": 5000
+    }
+  },
   "validation": {
     "bands_and_endpoints": "passed",
     "families": 23742,
     "family_overlap": 0,
-    "inputs_order_and_splits": "preserved",
+    "inputs_order_and_splits": "regrouped deterministically; input/target pairs preserved",
     "mirror_pairs": 25000,
     "mirror_signs": "passed",
     "records_checked": 50000,

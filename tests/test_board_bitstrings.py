@@ -9,14 +9,14 @@ import unittest
 
 import chess
 
-from board_bitstrings import (
+from tools.board_bitstrings import (
     BITSTRING_LENGTH,
     board_to_bitstring,
     bitstring_to_board,
     decode_bitstring,
     moves_to_bitstrings,
 )
-from legal_moves import get_legal_moves
+from tools.legal_moves import get_legal_moves
 
 
 def play(*moves: str, fen: str = chess.STARTING_FEN) -> chess.Board:
@@ -213,21 +213,21 @@ class EncodingTests(unittest.TestCase):
                 board.push(generator.choice(moves))
 
     def test_cli_pipeline_and_decode(self):
-        directory = Path(__file__).resolve().parent
+        directory = Path(__file__).resolve().parents[1]
         legal = subprocess.run(
-            [sys.executable, str(directory / "legal_moves.py")],
-            check=True, capture_output=True, text=True,
+            [sys.executable, "-m", "tools.legal_moves"],
+            cwd=directory, check=True, capture_output=True, text=True,
         )
         encoded = subprocess.run(
-            [sys.executable, str(directory / "board_bitstrings.py")],
-            input=legal.stdout, check=True, capture_output=True, text=True,
+            [sys.executable, "-m", "tools.board_bitstrings"],
+            cwd=directory, input=legal.stdout, check=True, capture_output=True, text=True,
         )
         positions = json.loads(encoded.stdout)
         self.assertEqual(len(positions), 20)
         self.assertTrue(all(len(bits) == 231 for bits in positions.values()))
         decoded = subprocess.run(
-            [sys.executable, str(directory / "board_bitstrings.py"), "--decode", positions["e2e4"]],
-            check=True, capture_output=True, text=True,
+            [sys.executable, "-m", "tools.board_bitstrings", "--decode", positions["e2e4"]],
+            cwd=directory, check=True, capture_output=True, text=True,
         )
         self.assertEqual(json.loads(decoded.stdout)["e4"], "white_pawn")
 

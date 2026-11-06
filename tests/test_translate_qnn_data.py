@@ -1,6 +1,7 @@
 """Score semantics and safe, reproducible conversion of the QNN exports."""
 
 import copy
+from collections import Counter
 import gzip
 import hashlib
 import json
@@ -11,9 +12,9 @@ import unittest
 
 import chess
 
-from board_bitstrings import board_to_bitstring
-from position_types import PositionType
-from translate_qnn_data import SPLITS, translate, translate_score
+from tools.board_bitstrings import board_to_bitstring
+from tools.position_types import PositionType
+from training.translate_qnn_data import SPLITS, translate, translate_score
 
 
 def score_record(kind, value, termination=None, **extra):
@@ -216,6 +217,44 @@ class ConversionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "must differ"):
             translate(self.source, self.source)
         self.assert_unchanged(protected)
+
+    def test_stratified_exports_preserve_all_labels_and_source_files(self):
+        translate(self.source, self.output)
+        before_rows = [row for split in SPLITS
+                       for row in json.loads((self.output / f"{split}.json").read_text())]
+        protected = {path: path.read_bytes() for path in self.source.iterdir() if path.is_file()}
+        source_families = {row["rook_bitstring"]: row["family_id"]
+                           for rows in self.rows.values() for row in rows}
+        manifest = translate(self.source, self.output, stratify_splits=True, seed=42)
+        self.assert_unchanged(protected)
+        self.assertEqual(manifest["split"]["method"], "group-stratified-v1")
+        self.assertEqual(manifest["split"]["actual_rows"], {"train": 16, "validation": 2, "test": 2})
+        after_rows, assignments = [], {}
+        for split in SPLITS:
+            rows = json.loads((self.output / f"{split}.json").read_text())
+            after_rows.extend(rows)
+            self.assertEqual(rows, sorted(rows, key=lambda row: row["input"]))
+            for row in rows:
+                family = source_families[row["input"]]
+                self.assertEqual(assignments.setdefault(family, split), split)
+        self.assertEqual(Counter((r["input"], r["output"]) for r in before_rows),
+                         Counter((r["input"], r["output"]) for r in after_rows))
+        self.assertEqual(manifest["validation"]["family_overlap"], 0)
+        files = self.old_exports()
+        # A normal rebuild remembers the stratification method and seed.
+        self.assertEqual(translate(self.source, self.output), manifest)
+        self.assert_unchanged(files)
+
+    def test_stratification_cannot_silently_change_existing_targets(self):
+        translate(self.source, self.output)
+        path = self.output / "train.json"
+        rows = json.loads(path.read_text())
+        rows[0]["output"] = .123
+        path.write_text(json.dumps(rows))
+        before = self.old_exports()
+        with self.assertRaisesRegex(ValueError, "input/target pairs"):
+            translate(self.source, self.output, stratify_splits=True)
+        self.assert_unchanged(before)
 
 
 if __name__ == "__main__":

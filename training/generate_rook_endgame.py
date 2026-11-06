@@ -24,8 +24,8 @@ import urllib.request
 import chess
 import chess.engine
 
-from board_bitstrings import board_to_bitstring, bitstring_to_board
-from position_types import PositionType
+from tools.board_bitstrings import board_to_bitstring, bitstring_to_board
+from tools.position_types import PositionType
 
 
 SCHEMA_VERSION = 1
@@ -35,7 +35,7 @@ ARCHIVE_SHA256 = "a1f0e3bcc5a6927a11fe6fc8e54a779754645f3c2bae2cf13420fd1957adaa
 RELEASE_URL = "https://github.com/official-stockfish/Stockfish/releases/tag/sf_19"
 DOWNLOAD_URL = f"https://github.com/official-stockfish/Stockfish/releases/download/{STOCKFISH_TAG}/{ARCHIVE_NAME}"
 BIN_NAMES = ("black_large", "black_advantage", "near_equal", "white_advantage", "white_large")
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 ROOKS = PositionType.ROOK_ENDGAME
 
 
@@ -499,7 +499,8 @@ def generate(args) -> dict:
                              "castling": False, "en_passant": False, "history_dependent_draws": False,
                              "augmentation": "color swap plus vertical reflection; score negated without reanalysis"},
                 "code_sha256": {name: sha256_file(ROOT / name) for name in
-                                ("generate_training_data.py", "board_bitstrings.py", "position_types.py")},
+                                ("training/generate_rook_endgame.py", "tools/board_bitstrings.py",
+                                 "tools/position_types.py")},
                 "software": {"python": platform.python_version(), "python_chess": chess.__version__},
                 "limitations": ["Engine estimates at a fixed node budget, not calibrated win probabilities.",
                                 "Uniform legal placements are not a distribution of positions from human games.",

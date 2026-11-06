@@ -8,15 +8,15 @@ import unittest
 
 import chess
 
-from board_bitstrings import (
+from tools.board_bitstrings import (
     BITSTRING_LENGTH,
     board_to_bitstring,
     bitstring_to_board,
     decode_bitstring,
     moves_to_bitstrings,
 )
-from legal_moves import get_legal_moves
-from position_types import PositionType
+from tools.legal_moves import get_legal_moves
+from tools.position_types import PositionType
 
 
 REDUCED = PositionType.KING_ROOK_VS_KING
@@ -156,23 +156,23 @@ class ReducedPositionTests(unittest.TestCase):
             )
 
     def test_reduced_cli_pipeline_and_decode(self):
-        directory = Path(__file__).resolve().parent
+        directory = Path(__file__).resolve().parents[1]
         arguments = [REDUCED_FEN, "--position-type", "king-rook-vs-king"]
         legal = subprocess.run(
-            [sys.executable, str(directory / "legal_moves.py"), *arguments],
-            check=True, capture_output=True, text=True,
+            [sys.executable, "-m", "tools.legal_moves", *arguments],
+            cwd=directory, check=True, capture_output=True, text=True,
         )
         encoded = subprocess.run(
-            [sys.executable, str(directory / "board_bitstrings.py"), *arguments],
-            input=legal.stdout, check=True, capture_output=True, text=True,
+            [sys.executable, "-m", "tools.board_bitstrings", *arguments],
+            cwd=directory, input=legal.stdout, check=True, capture_output=True, text=True,
         )
         positions = json.loads(encoded.stdout)
         self.assertEqual(set(positions), set(json.loads(legal.stdout)))
         self.assertTrue(all(len(bits) == 28 for bits in positions.values()))
         decoded = subprocess.run(
-            [sys.executable, str(directory / "board_bitstrings.py"),
+            [sys.executable, "-m", "tools.board_bitstrings",
              "--decode", positions["a1a4"], "--position-type", "king-rook-vs-king"],
-            check=True, capture_output=True, text=True,
+            cwd=directory, check=True, capture_output=True, text=True,
         )
         self.assertEqual(json.loads(decoded.stdout)["a4"], "white_rook")
 
@@ -239,13 +239,13 @@ class ReducedValidationTests(unittest.TestCase):
                     call()
 
     def test_reduced_clis_require_fen_and_reject_unknown_type(self):
-        directory = Path(__file__).resolve().parent
-        for script in ("legal_moves.py", "board_bitstrings.py"):
+        directory = Path(__file__).resolve().parents[1]
+        for module in ("tools.legal_moves", "tools.board_bitstrings"):
             for position_type, message in (("king-rook-vs-king", "explicit FEN"), ("unknown", "invalid choice")):
-                with self.subTest(script=script, position_type=position_type):
+                with self.subTest(module=module, position_type=position_type):
                     result = subprocess.run(
-                        [sys.executable, str(directory / script), "--position-type", position_type],
-                        input="[]", capture_output=True, text=True,
+                        [sys.executable, "-m", module, "--position-type", position_type],
+                        cwd=directory, input="[]", capture_output=True, text=True,
                     )
                     self.assertEqual(result.returncode, 2)
                     self.assertIn(message, result.stderr)

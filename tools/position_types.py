@@ -7,16 +7,21 @@ import chess
 
 class PositionType(Enum):
     STANDARD = "standard"
+    SQUARE_BOARD = "square-board"
     KING_ROOK_VS_KING = "king-rook-vs-king"
     ROOK_ENDGAME = "rook-endgame"
 
     @property
     def piece_slots(self) -> tuple[tuple[bool, int, int], ...]:
         """Return (color, piece type, original square) for each encoding slot."""
+        if self == PositionType.SQUARE_BOARD:
+            raise ValueError("square-board uses square codes instead of original-piece slots")
         return _PIECE_SLOTS[self]
 
     @property
     def piece_data_length(self) -> int:
+        if self == PositionType.SQUARE_BOARD:
+            return 256
         return sum(6 if piece_type == chess.KING else 7 for _, piece_type, _ in self.piece_slots)
 
     @property
@@ -60,7 +65,7 @@ def _validate_position_type(position_type: PositionType) -> None:
 def _validate_piece_set(board: chess.Board, position_type: PositionType) -> None:
     """Restrict reduced positions without changing standard legal-move support."""
     _validate_position_type(position_type)
-    if position_type == PositionType.STANDARD:
+    if position_type in (PositionType.STANDARD, PositionType.SQUARE_BOARD):
         return
     for color in (chess.WHITE, chess.BLACK):
         for piece_type in chess.PIECE_TYPES:

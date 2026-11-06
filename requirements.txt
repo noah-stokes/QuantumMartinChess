@@ -1,3 +1,5 @@
 chess>=1.11.2,<2
 qiskit[visualization]>=2.6.2,<3
 qiskit-aer>=0.18.2,<0.19
+qiskit-machine-learning>=0.9.1,<0.10
+torch>=2.8,<3

@@ -13,10 +13,10 @@ from unittest.mock import patch
 import chess
 import chess.engine
 
-from board_bitstrings import board_to_bitstring, bitstring_to_board, moves_to_bitstrings
-from legal_moves import get_legal_moves
-from position_types import PositionType
-from generate_training_data import (
+from tools.board_bitstrings import board_to_bitstring, bitstring_to_board, moves_to_bitstrings
+from tools.legal_moves import get_legal_moves
+from tools.position_types import PositionType
+from training.generate_rook_endgame import (
     AnalysisCache, BIN_NAMES, SYMMETRIES, analyze_board,
     evaluation_label, family_id, generate, make_record,
     normalize_score, prepare_engine, sample_pairs, score_bin, split_for_family,
@@ -214,8 +214,8 @@ class DatasetTests(unittest.TestCase):
                                    seed=42, two_rook_count=80, single_rook_count=16,
                                    bare_king_count=16, pilot_positions=20)
             engine = FakeEngine()
-            with patch("generate_training_data.prepare_engine", return_value=(root / "fake", {"binary_sha256": "verified"})), \
-                    patch("generate_training_data.chess.engine.SimpleEngine.popen_uci", return_value=engine):
+            with patch("training.generate_rook_endgame.prepare_engine", return_value=(root / "fake", {"binary_sha256": "verified"})), \
+                    patch("training.generate_rook_endgame.chess.engine.SimpleEngine.popen_uci", return_value=engine):
                 first = generate(args)
                 hashes = {key: value["sha256"] for key, value in first["files"].items()}
                 calls = engine.calls
