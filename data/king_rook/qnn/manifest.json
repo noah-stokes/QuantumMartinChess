@@ -1,0 +1,166 @@
+{
+  "band_definitions": {
+    "black_mate": "[-1,-0.75)",
+    "black_ordinary": "[-0.75,-0.2)",
+    "near_equal": "[-0.2,0.2]",
+    "white_mate": "(0.75,1]",
+    "white_ordinary": "(0.2,0.75]"
+  },
+  "baselines": {
+    "scope": "unweighted converted targets; compare only within the same mapping version",
+    "test": {
+      "material_mean_mse": 0.10089661602821566,
+      "positions": 5122,
+      "zero_prediction_mse": 0.15648775049497238
+    },
+    "training_material_means": {
+      "KRvK": 0.5920615408234758,
+      "KRvKR": 0.0,
+      "KvK": 0.0,
+      "KvKR": -0.5920615408234758
+    },
+    "validation": {
+      "material_mean_mse": 0.10040662486112546,
+      "positions": 4922,
+      "zero_prediction_mse": 0.1572832839730427
+    }
+  },
+  "converter_sha256": "901db8cfa9a80dc605f3509c6c4963870cfaf48a9266adc60217722a23607be3",
+  "distribution": {
+    "categories": {
+      "centipawn": 46898,
+      "checkmate": 36,
+      "nonterminal_mate": 1066,
+      "terminal_draw": 2000
+    },
+    "exact_endpoint_count": 36,
+    "maximum": 1.0,
+    "minimum": -1.0,
+    "positions": 50000,
+    "score_bands": {
+      "black_mate": 551,
+      "black_ordinary": 9190,
+      "near_equal": 30518,
+      "white_mate": 551,
+      "white_ordinary": 9190
+    }
+  },
+  "files": {
+    "test": {
+      "bytes": 472474,
+      "categories": {
+        "centipawn": 4860,
+        "checkmate": 8,
+        "nonterminal_mate": 118,
+        "terminal_draw": 136
+      },
+      "exact_endpoint_count": 8,
+      "maximum": 1.0,
+      "minimum": -1.0,
+      "path": "test.json",
+      "positions": 5122,
+      "score_bands": {
+        "black_mate": 63,
+        "black_ordinary": 934,
+        "near_equal": 3128,
+        "white_mate": 63,
+        "white_ordinary": 934
+      },
+      "sha256": "f9c4052d4f4b90185f85491e00af1ff5810db6ae15c0d6622ebdcae7644e68f3"
+    },
+    "train": {
+      "bytes": 3676709,
+      "categories": {
+        "centipawn": 37370,
+        "checkmate": 26,
+        "nonterminal_mate": 852,
+        "terminal_draw": 1708
+      },
+      "exact_endpoint_count": 26,
+      "maximum": 1.0,
+      "minimum": -1.0,
+      "path": "train.json",
+      "positions": 39956,
+      "score_bands": {
+        "black_mate": 439,
+        "black_ordinary": 7329,
+        "near_equal": 24420,
+        "white_mate": 439,
+        "white_ordinary": 7329
+      },
+      "sha256": "748b6115eba874ef09f35bf996866decf2a1cde0caa63835f05072561b28c40a"
+    },
+    "validation": {
+      "bytes": 454310,
+      "categories": {
+        "centipawn": 4668,
+        "checkmate": 2,
+        "nonterminal_mate": 96,
+        "terminal_draw": 156
+      },
+      "exact_endpoint_count": 2,
+      "maximum": 1.0,
+      "minimum": -1.0,
+      "path": "validation.json",
+      "positions": 4922,
+      "score_bands": {
+        "black_mate": 49,
+        "black_ordinary": 927,
+        "near_equal": 2970,
+        "white_mate": 49,
+        "white_ordinary": 927
+      },
+      "sha256": "676398aa43a8fac08d13e0257b7fe0d35891b7a7ed230750aadc1a04abe13a0e"
+    }
+  },
+  "limitations": [
+    "Mate distances are engine-reported, not guaranteed globally shortest.",
+    "Distance-aware targets encourage progress but do not guarantee a mating policy.",
+    "Original rich-record targets, weights, and baseline scores use the old mapping."
+  ],
+  "mapping": {
+    "centipawn_scale": 400.0,
+    "checkmate": "signed endpoint from explicit winner",
+    "mate_band_width": 0.25,
+    "mate_decay_per_move": 0.9,
+    "mate_distance_unit": "engine-reported moves",
+    "nonterminal_mate_formula": "sign(m) * (0.75 + 0.25 * 0.9 ** abs(m))",
+    "ordinary_formula": "0.75 * tanh(white_centipawns / 400)",
+    "ordinary_limit": 0.75,
+    "rounding_guard": "round mate magnitudes up to nextafter(0.75, 1) if binary64 reaches the boundary",
+    "terminal_draw": 0
+  },
+  "mapping_version": "mate-bands-v1",
+  "record_schema": {
+    "input": "35-character binary string",
+    "output": "White-perspective float in [-1,1]"
+  },
+  "source_manifest_sha256": "e3a2e601e62a30925410363b3d0db0aef63cf2306cf33e6486ad3e449caec107",
+  "sources": {
+    "test": {
+      "path": "test.jsonl.gz",
+      "positions": 5122,
+      "sha256": "8b2625841ff2cfbc7c9f4e15aee4fb4b37348ae5c7f0efa25875e147c5e22214"
+    },
+    "train": {
+      "path": "train.jsonl.gz",
+      "positions": 39956,
+      "sha256": "2bbeadaee623e5d3671929cf322d598ee4ccbcc64a01dcf0a597f323e5b4a095"
+    },
+    "validation": {
+      "path": "validation.jsonl.gz",
+      "positions": 4922,
+      "sha256": "5d3669c4940b05be12e1b3459c15b5ab5afec1e523b67df047397d784ae38095"
+    }
+  },
+  "validation": {
+    "bands_and_endpoints": "passed",
+    "families": 23742,
+    "family_overlap": 0,
+    "inputs_order_and_splits": "preserved",
+    "mirror_pairs": 25000,
+    "mirror_signs": "passed",
+    "records_checked": 50000,
+    "unique_inputs": 50000
+  }
+}
