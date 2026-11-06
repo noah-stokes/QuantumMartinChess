@@ -1,145 +1,84 @@
-# Rook-endgame training data
+# Rook-endgame source data
 
-`train.jsonl.gz`, `validation.jsonl.gz`, and `test.jsonl.gz` contain 50,000
-unique legal positions in total: 40,000 with one rook on each side, 4,000
-with only White's rook, 4,000 with only Black's rook, and 2,000 with bare kings.
-Both turns are equally represented. Positions have no castling rights or
-en passant, and start with a zero halfmove clock and no repetition history.
+These are the source positions and engine evaluations used to create the
+[QNN training files](qnn/README.md). Use those JSON exports to train the
+current model; this directory keeps the full records for inspection and
+regeneration.
 
-The dataset is a first evaluation experiment. It does not establish that
-learning rook endgames will transfer to other pieces. Positions are sampled
-uniformly from distinct-square placements conditioned on legality, rather
-than from human games. Random placements can contain checks, hanging rooks,
-and tactical captures. These are intentionally retained.
+## Positions
 
-## Inputs and targets
+The dataset contains 50,000 unique legal positions:
 
-Each line is a JSON object with these fields:
+| Material | Positions |
+| --- | ---: |
+| King and rook on each side (`KRvKR`) | 40,000 |
+| White king and rook versus Black king (`KRvK`) | 4,000 |
+| White king versus Black king and rook (`KvKR`) | 4,000 |
+| Bare kings (`KvK`) | 2,000 |
+
+This mix covers equal material, rook advantages for either color, and draws
+with no rooks. Positions are random placements checked for legality, rather
+than positions from played games. Checks and hanging rooks are included.
+
+Each position has a color-swapped, vertically reflected partner with a
+negated score. Both turns are equally represented. There are no castling
+rights or en passant targets; halfmove clocks start at zero and there is no
+repetition history.
+
+The split is roughly 80% training, 10% validation, and 10% test. Rotations,
+reflections, color swaps, and turn variants of a placement share a split,
+so equivalent boards cannot leak into held-out evaluation.
+
+## Files and records
+
+| File | Contents |
+| --- | --- |
+| `train.jsonl.gz` | 39,956 source records, including training weights. |
+| `validation.jsonl.gz` | 4,922 source records. |
+| `test.jsonl.gz` | 5,122 source records. |
+| `manifest.json` | Generation settings, checksums, counts, score distributions, and source-score baselines. |
+| `pilot.json` | Statistics and timing estimates for the first 2,000 positions, which are also included in the full dataset. |
+
+Each compressed file contains one JSON object per line. The main fields are:
 
 | Field | Meaning |
 | --- | --- |
-| `bitstring` | Existing 231-bit standard encoding, including turn and game state |
-| `rook_bitstring` | Compact 35-bit `PositionType.ROOK_ENDGAME` encoding |
-| `target_score` | Continuous White-perspective evaluation in `[-1, 1]` |
-| `raw_engine_evaluation` | White-perspective `{"kind":"cp","value":...}` or `{"kind":"mate","value":...,"unit":"moves"}`; `null` for terminal draws |
-| `fen` | Position for inspection, not a model input |
-| `material_class` | `KRvKR`, `KRvK`, `KvKR`, or `KvK` |
-| `family_id` | Canonical piece placement used to prevent split leakage |
-| `source_fen` | Position actually analyzed or checked for terminal rules |
-| `augmentation` | `identity` or `color_swap_vertical` |
-| `termination` | `checkmate`, `stalemate`, `insufficient_material`, or `null` |
-| `engine_depth`, `engine_nodes` | Depth/nodes at the last exact score reported by the search; not necessarily the full node budget |
-| `sampling_weight` | Training-only inverse-frequency score-bin weight |
+| `fen` | Readable board position. |
+| `bitstring`, `rook_bitstring` | The same board encoded in 231 bits and 35 bits. See [board representations](../../README.md#board-representations). |
+| `raw_engine_evaluation` | White-perspective centipawn or mate evaluation; `null` for terminal draws. Checkmate records include an explicit `winner`. |
+| `target_score` | Original score mapping, described below. |
+| `material_class` | One of the four material groups above. |
+| `family_id` | Placement family used to keep related positions in one split. |
+| `source_fen`, `augmentation` | The analyzed position and whether this record is its color-swapped mirror. |
+| `termination` | `checkmate`, `stalemate`, `insufficient_material`, or `null`. |
+| `engine_depth`, `engine_nodes` | Search depth and node count at the last exact score reported. |
+| `sampling_weight` | Training-only weight that gives each occupied source-score bin equal total weight. |
 
-Only a bitstring goes into the QNN. The scalar `target_score` is the answer
-it learns to predict; all other fields are labels, inspection data, or
-training metadata. Keep bitstrings as strings to preserve leading zeros.
-Use the 231-bit format if later curriculum stages must keep the same input
-layout. Choosing the compact format does not promise automatic weight
-transfer when the input layout changes.
+The source `target_score` uses `tanh(white_centipawns / 400)`, with mates at
+`+1` or `-1` and terminal draws at zero. Positive always favors White.
+The QNN converter reads the raw evaluations to produce its newer scores,
+which distinguish mate distances. Source targets, weights, and baseline
+errors belong to the original mapping; use the [QNN manifest](qnn/manifest.json)
+for current training and evaluation. Source weights can be used for weighted
+sampling or weighted loss, but should not be applied twice. Validation and
+test records have no weights and are evaluated unweighted.
 
-Positive scores favor White; negative scores favor Black, independent of
-whose turn it is. For finite engine evaluations the fixed transformation is:
+## Regenerating
 
-```python
-target_score = math.tanh(white_centipawns / 400.0)
-```
-
-For example, `+200` centipawns maps to approximately `+0.4621`. These values
-are bounded engine evaluations, **not calibrated win probabilities**.
-Engine-reported mates and checkmates use the winning side's endpoint.
-Checkmate's raw mate value is zero with an explicit `winner` field to avoid
-signed-zero ambiguity. Stalemate and insufficient material use zero.
-Nonterminal theoretical draws retain their engine evaluations. No tablebase
-outcome overrides the continuous training target. Mate distance is not a
-separate training objective in this dataset.
-
-The same transformation should be used when adding pieces. Do not normalize
-each material class separately merely to stretch its score distribution.
-
-## Loading
-
-From the repository root:
-
-```python
-import gzip
-import json
-from pathlib import Path
-
-directory = Path("data/king_rook")
-with gzip.open(directory / "train.jsonl.gz", "rt") as stream:
-    for line in stream:
-        example = json.loads(line)
-        bits = example["bitstring"]
-        target = example["target_score"]
-        weight = example["sampling_weight"]
-        # Send bits and target to your black-box training adapter.
-```
-
-Training weights are `N_train / (occupied_bins * examples_in_bin)`, giving
-each occupied score bin equal total weight. Use them either for weighted
-sampling or for a weighted loss; applying both would double-correct the
-distribution. Weights cannot create coverage in empty bins. Validation and
-test files intentionally omit weights and should be evaluated unweighted.
-
-The bins are `[-1,-0.8)`, `[-0.8,-0.2)`, `[-0.2,0.2]`, `(0.2,0.8]`, and
-`(0.8,1]`. The manifest reports every bin, bins below 1% coverage, exact
-endpoints, and scores with absolute value at least `0.95`.
-
-## Reproducing and resuming
+Run from the repository root:
 
 ```sh
 .venv/bin/python generate_training_data.py
+.venv/bin/python translate_qnn_data.py
 ```
 
-The generator downloads the official macOS Stockfish 19 universal release
-into `.cache/rook_endgame/stockfish/`, verifies the pinned release SHA-256,
-and only then extracts and runs it. For another platform, provide an
-independently verified Stockfish 19 executable:
+The generator uses Stockfish 19 with 10,000 nodes per analyzed position,
+one thread, 64 MiB hash, and no tablebases. Terminal positions use chess
+rules directly. Search state is cleared between positions; completed
+analyses are cached in SQLite under `.cache/rook_endgame/`, so rerunning
+the same command resumes work.
 
-```sh
-.venv/bin/python generate_training_data.py \
-  --engine /path/to/stockfish \
-  --engine-sha256 YOUR_VERIFIED_BINARY_SHA256
-```
-
-Analysis uses one thread, 64 MiB hash, 10,000 nodes, no engine tablebases,
-and cleared hash/history between positions. The last exact search score
-is used; upper/lower bound scores are ignored. Every analyzed position's
-result is committed to SQLite. Rerunning the same command recreates the
-deterministic sample and reuses completed analyses. A changed engine or
-analysis configuration requires a separate `--cache-dir`.
-
-The first 2,000 generated positions form the pilot, recorded in `pilot.json`
-and included in the final dataset. Its cold-run estimate is approximate;
-cache reuse can reduce runtime. `generation.log` records the delivered run.
-
-Color-swapped, vertically reflected partners are added with exactly negated
-scores, without a second engine analysis. All eight board symmetries,
-color swaps, and turn variants of a placement share a split family. A seeded
-SHA-256 family hash assigns approximately 80%/10%/10% to the three splits.
-This geometric equivalence is for pawnless positions without castling.
-
-Gzip timestamps and row order are deterministic, so reruns with the same
-configuration and cached labels produce identical dataset file checksums.
-Runtime/cache statistics in the manifest can differ between runs. The
-manifest records code and engine checksums, Python/chess versions, settings,
-counts, score distributions, encoding validation, and held-out baseline MSE.
-
-## Interpreting results
-
-Compare a trained model's unweighted held-out MSE with both manifest
-baselines: always predicting zero, and predicting the training-set mean
-for each material class. Beating a material-only baseline is evidence of
-learning distinctions within this dataset, not proof of full-chess skill.
-Keep the split files fixed when comparing experiments.
-
-The compact layout is White king `[6]`, White rook `[captured][6]`, Black
-king `[6]`, Black rook `[captured][6]`, then turn `[1]`, castling `[4]`, and
-en passant `[4]`. Captured rooks have zero coordinates. The existing standard
-and 28-bit encodings retain their formats and validation rules.
-
-Engine source: [Stockfish 19 release](https://github.com/official-stockfish/Stockfish/releases/tag/sf_19).
-The engine is cached locally, not included in the dataset files; the official
-archive includes its source/license information. Dataset generation needs
-only Python and the existing `chess` dependency, without Qiskit or a QNN.
+On macOS, the generator downloads and checksum-verifies a pinned Stockfish
+release. On other platforms, pass `--engine /path/to/stockfish` and
+`--engine-sha256 VERIFIED_BINARY_SHA256`. Use a separate `--cache-dir` when
+changing the engine or analysis settings.

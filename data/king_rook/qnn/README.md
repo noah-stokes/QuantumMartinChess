@@ -1,4 +1,22 @@
-# QNN inputs and targets
+# QNN training data
+
+These files pair a 35-bit rook-endgame position with the score the QNN
+should learn to predict. They contain the same 50,000 positions as the
+[source dataset](../README.md), with just the input and target retained.
+
+## Files
+
+| File | Records | Use |
+| --- | ---: | --- |
+| `train.json` | 39,956 | Fit the model. |
+| `validation.json` | 4,922 | Tune the model. |
+| `test.json` | 5,122 | Measure final performance. |
+
+`manifest.json` records the score mapping, file checksums, distributions,
+and validation/test baselines. Equivalent boards—including rotations,
+reflections, color swaps, and turn variants—stay in the same split.
+
+## Record format
 
 Each file is a plain JSON array. Every record has exactly two fields:
 
@@ -9,17 +27,43 @@ Each file is a plain JSON array. Every record has exactly two fields:
 }
 ```
 
-`input` is a 35-character binary string. `output` is the target score in
-`[-1, 1]`, with positive values favoring White and negative values favoring
-Black. Keep the input as a string to preserve leading zeros.
+- `input`: the 35-bit `PositionType.ROOK_ENDGAME` encoding of both kings,
+  up to one rook per color, and game state. Keep it as a string to preserve
+  leading zeros. See the [encoding explanation](../../../README.md#board-representations).
+- `output`: a score in `[-1, 1]`. Positive favors White and negative favors
+  Black, regardless of whose turn it is. This is a position evaluation,
+  not a win probability or a move label.
 
-| File | Records |
+## Target scores
+
+The mapping is called `mate-bands-v1`. It reserves the outer score bands
+for forced mates, keeping them separate from ordinary advantages:
+
+| Score range | Meaning |
+| --- | --- |
+| `[-1, -0.75)` | Forced mate for Black. |
+| `[-0.75, +0.75]` | Ordinary engine evaluations and draws. |
+| `(+0.75, +1]` | Forced mate for White. |
+
+Ordinary evaluations use `0.75 * tanh(white_centipawns / 400)`.
+Nonterminal mates use `sign(m) * (0.75 + 0.25 * 0.9 ** abs(m))`, where
+`m` is the signed engine-reported mate distance in moves, positive for White.
+This gives shorter mates scores closer to the winning side's endpoint:
+
+| White-winning position | Target |
 | --- | ---: |
-| `train.json` | 39,956 |
-| `validation.json` | 4,922 |
-| `test.json` | 5,122 |
+| Mate in 10 moves | `0.837170` |
+| Mate in 5 moves | `0.897623` |
+| Mate in 1 move | `0.975000` |
+| Black already checkmated | `1.000000` |
 
-Load from the repository root:
+Black wins receive symmetric negative values. Stalemate and insufficient
+material receive zero; other positions keep their scaled engine evaluations.
+Mate distances come from the engine search and are not guaranteed shortest.
+
+## Loading
+
+From the repository root:
 
 ```python
 import json
@@ -30,61 +74,18 @@ inputs = [record["input"] for record in records]
 targets = [record["output"] for record in records]
 ```
 
-## Mate-aware target scores
-
-These exports use mapping version `mate-bands-v1`. They preserve position
-order, split assignments, and input bitstrings from the original records,
-and replace the old targets with the following White-perspective scores:
-
-| Band | Meaning |
-| --- | --- |
-| `[-1, -0.75)` | Forced mates for Black |
-| `[-0.75, +0.75]` | Ordinary centipawn evaluations and draws |
-| `(+0.75, +1]` | Forced mates for White |
-
-Ordinary evaluations use `0.75 * tanh(white_centipawns / 400)`. Nonterminal
-mates use `sign(m) * (0.75 + 0.25 * 0.9 ** abs(m))`, where `m` is the signed
-engine-reported mate distance in **moves**, from White's perspective.
-The scale and decay are fixed rather than fitted to this dataset's longest
-mate. For extremely long future distances, a floating-point rounding guard
-keeps mate scores strictly outside the ordinary band.
-
-| White-winning position | Target |
-| --- | ---: |
-| Black already checkmated | `1.000000` |
-| Mate in 1 move | `0.975000` |
-| Mate in 5 moves | `0.897623` |
-| Mate in 10 moves | `0.837170` |
-
-Black-winning positions receive symmetric negative scores. Actual checkmate
-uses the explicit winner because a zero mate distance carries no sign.
-Stalemate and insufficient material use zero. Nonterminal theoretical draws
-keep their scaled engine evaluations.
-
-Only 36 of the current 50,000 records receive exact endpoint targets:
-already-checkmated boards. The other records comprise 46,898 centipawn
-evaluations, 1,066 nonterminal mates, and 2,000 terminal draws. These targets
-encourage progress toward shorter mates; engine-reported distances are not
-guaranteed globally shortest, and learned predictions do not guarantee a
-correct mating policy.
-
-## Reproducing the translation
-
-From the repository root:
+## Rebuilding and evaluating
 
 ```sh
 .venv/bin/python translate_qnn_data.py
 ```
 
-The converter reads the original compressed rich records, verifies their
-source checksums, and calculates targets from raw evaluations and terminal
-metadata. It validates all three splits before replacing these JSON exports.
-No Stockfish analysis is run. The original records, generator, cache, and
-original manifest stay unchanged. Rerunning the command is deterministic.
+The converter checks the source-file checksums and calculates scores from
+raw evaluations and terminal metadata, without running Stockfish. It keeps
+the source inputs, order, and splits, and writes these exports and their
+manifest. The source files are unchanged.
 
-The conversion's own `manifest.json` records the mapping, source/output
-checksums, score distributions, validation, and recalculated unweighted
-validation/test baselines. Use those baselines for these targets. The parent
-directory's manifest, original rich-record targets, and original sampling
-weights refer to the previous mapping; their baseline errors cannot be
-compared directly with the new ones as evidence of model improvement.
+Compare unweighted validation/test mean squared error (MSE) with the
+baselines in this directory's `manifest.json`: predicting zero and predicting
+the training mean for each material group. The parent directory's targets,
+weights, and baseline errors use the older score mapping.
