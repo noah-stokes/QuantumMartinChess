@@ -33,7 +33,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     position_type = PositionType(args.position_type)
     if args.fen is None and position_type != PositionType.STANDARD:
-        parser.error("An explicit FEN is required for king-rook-vs-king")
+        parser.error("An explicit FEN is required for reduced position types")
     try:
         fen = chess.STARTING_FEN if args.fen is None else args.fen
         moves = get_legal_moves(fen, position_type)

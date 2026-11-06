@@ -1,5 +1,32 @@
 # QuantumMartinChess
 
+Use Python 3.12 and the project's `.venv`. Dependencies include Qiskit with
+visualization support and Qiskit Aer for local simulation. No IBM account or
+API key is needed to run locally.
+
+To create a new environment with [uv](https://docs.astral.sh/uv/):
+
+```sh
+uv venv --python 3.12 --seed .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+For the environment already installed in this checkout, activate it and run
+the example:
+
+```sh
+source .venv/bin/activate
+python qiskit_example.py
+```
+
+The example creates a Bell pair and simulates 1,024 measurements. The output
+contains only `00` and `11`, with roughly half of the measurements in each.
+Select `.venv/bin/python` as your IDE's Python interpreter.
+
+Setup references: [Qiskit installation](https://quantum.cloud.ibm.com/docs/en/guides/install-qiskit)
+and [Qiskit Aer](https://qiskit.github.io/qiskit-aer/getting_started.html).
+
 `board_bitstrings.py` encodes a supplied `chess.Board` in one call. Use
 `PositionType.STANDARD` for **231 binary characters** (the default), or
 `PositionType.KING_ROOK_VS_KING` for **28 binary characters**:
@@ -129,3 +156,25 @@ pieces, or clearing its move stack resets those identities. Historical moves and
 clocks are unavailable. The format supports standard chess; Chess960 is rejected.
 
 Run the regression suite with `python3 -m unittest -v`.
+
+## Rook-endgame training data
+
+The generated [rook-endgame dataset](data/king_rook/README.md) contains 50,000
+positions with continuous White-perspective scores in `[-1, 1]`. It includes
+opposing rooks, single-rook advantages for both colors, and bare kings. Each
+record contains the existing 231-bit input and a compact 35-bit input.
+
+Use `PositionType.ROOK_ENDGAME` (CLI `--position-type rook-endgame`) for the
+35-bit format: White king `[6]`, White rook `[7]`, Black king `[6]`, Black
+rook `[7]`, and the existing nine state bits. Either rook may be captured.
+This format also supports castling, although the initial dataset samples
+positions without castling rights. Existing formats are unchanged.
+
+Generate or resume the dataset with:
+
+```sh
+.venv/bin/python generate_training_data.py
+```
+
+See the dataset guide for loading examples, engine verification, pilot
+statistics, split isolation, sampling weights, and generalization limits.

@@ -1,0 +1,28 @@
+Engine: {'name': 'Stockfish 19', 'author': 'the Stockfish developers (see AUTHORS file)'}; generating 50,000 positions
+Pilot: {"abs_score_at_least_0_95_count": 40, "abs_score_at_least_0_95_fraction": 0.02, "cached_pairs": 0, "elapsed_seconds": 12.277264541000001, "empty_bins": [], "estimated_full_cold_analysis_seconds": 271.2473344750005, "estimated_remaining_cold_analysis_seconds": 260.3974410960005, "exact_endpoint_count": 38, "exact_endpoint_fraction": 0.019, "included_in_final_dataset": true, "material_counts": {"KRvK": 153, "KRvKR": 1608, "KvK": 86, "KvKR": 153}, "new_pairs": 1000, "positions": 2000, "raw_evaluation_kinds": {"cp": 1876, "mate": 38, "terminal_draw": 86}, "score_bins": {"black_advantage": 85, "black_large": 281, "near_equal": 1268, "white_advantage": 85, "white_large": 281}, "sparse_bins_below_one_percent": [], "turn_counts": {"b": 1000, "w": 1000}}
+Progress: 4,000/50,000; cache hits 0; elapsed 27.7s
+Progress: 6,000/50,000; cache hits 0; elapsed 43.8s
+Progress: 8,000/50,000; cache hits 0; elapsed 67.2s
+Progress: 10,000/50,000; cache hits 0; elapsed 89.5s
+Progress: 12,000/50,000; cache hits 0; elapsed 106.7s
+Progress: 14,000/50,000; cache hits 0; elapsed 121.2s
+Progress: 16,000/50,000; cache hits 0; elapsed 135.6s
+Progress: 18,000/50,000; cache hits 0; elapsed 155.8s
+Progress: 20,000/50,000; cache hits 0; elapsed 173.2s
+Progress: 22,000/50,000; cache hits 0; elapsed 188.1s
+Progress: 24,000/50,000; cache hits 0; elapsed 203.1s
+Progress: 26,000/50,000; cache hits 0; elapsed 217.9s
+Progress: 28,000/50,000; cache hits 0; elapsed 233.2s
+Progress: 30,000/50,000; cache hits 0; elapsed 248.3s
+Progress: 32,000/50,000; cache hits 0; elapsed 262.4s
+Progress: 34,000/50,000; cache hits 0; elapsed 276.8s
+Progress: 36,000/50,000; cache hits 0; elapsed 291.0s
+Progress: 38,000/50,000; cache hits 0; elapsed 305.9s
+Progress: 40,000/50,000; cache hits 0; elapsed 319.9s
+Progress: 42,000/50,000; cache hits 0; elapsed 333.9s
+Progress: 44,000/50,000; cache hits 0; elapsed 348.1s
+Progress: 46,000/50,000; cache hits 0; elapsed 362.6s
+Progress: 48,000/50,000; cache hits 1; elapsed 376.8s
+Progress: 50,000/50,000; cache hits 1; elapsed 391.0s
+Checking every record and exporting splits...
+Complete: {"abs_score_at_least_0_95_count": 1128, "abs_score_at_least_0_95_fraction": 0.02256, "baselines": {"test": {"material_mean_mse": 0.16993948385459073, "positions": 5122, "training_material_means": {"KRvK": 0.7755660115292534, "KRvKR": 4.518643249625753e-19, "KvK": 0.0, "KvKR": -0.7755660115292545}, "zero_prediction_mse": 0.265089214639293}, "validation": {"material_mean_mse": 0.17143763032941658, "positions": 4922, "training_material_means": {"KRvK": 0.7755660115292534, "KRvKR": 4.518643249625753e-19, "KvK": 0.0, "KvKR": -0.7755660115292545}, "zero_prediction_mse": 0.2692891649667367}}, "empty_bins": [], "exact_endpoint_count": 1102, "exact_endpoint_fraction": 0.02204, "material_counts": {"KRvK": 4000, "KRvKR": 40000, "KvK": 2000, "KvKR": 4000}, "output": "/Users/noahstokes/Documents/QuantumMartinChess/data/king_rook", "positions": 50000, "raw_evaluation_kinds": {"cp": 46898, "mate": 1102, "terminal_draw": 2000}, "score_bins": {"black_advantage": 2248, "black_large": 7495, "near_equal": 30514, "white_advantage": 2248, "white_large": 7495}, "sparse_bins_below_one_percent": [], "turn_counts": {"b": 25000, "w": 25000}}

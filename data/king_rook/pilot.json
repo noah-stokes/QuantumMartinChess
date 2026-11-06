@@ -1,0 +1,37 @@
+{
+  "abs_score_at_least_0_95_count": 40,
+  "abs_score_at_least_0_95_fraction": 0.02,
+  "cached_pairs": 0,
+  "elapsed_seconds": 12.277264541000001,
+  "empty_bins": [],
+  "estimated_full_cold_analysis_seconds": 271.2473344750005,
+  "estimated_remaining_cold_analysis_seconds": 260.3974410960005,
+  "exact_endpoint_count": 38,
+  "exact_endpoint_fraction": 0.019,
+  "included_in_final_dataset": true,
+  "material_counts": {
+    "KRvK": 153,
+    "KRvKR": 1608,
+    "KvK": 86,
+    "KvKR": 153
+  },
+  "new_pairs": 1000,
+  "positions": 2000,
+  "raw_evaluation_kinds": {
+    "cp": 1876,
+    "mate": 38,
+    "terminal_draw": 86
+  },
+  "score_bins": {
+    "black_advantage": 85,
+    "black_large": 281,
+    "near_equal": 1268,
+    "white_advantage": 85,
+    "white_large": 281
+  },
+  "sparse_bins_below_one_percent": [],
+  "turn_counts": {
+    "b": 1000,
+    "w": 1000
+  }
+}

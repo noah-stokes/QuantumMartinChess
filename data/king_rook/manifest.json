@@ -1,0 +1,310 @@
+{
+  "analysis_configuration": {
+    "binary_sha256": "8eed61129d1493c5d1f2fd9323f0c54c47ac49319911fbde18c6b9c87e8b13c5",
+    "clear_search_state_per_position": true,
+    "hash_mib": 64,
+    "nodes": 10000,
+    "perspective": "white",
+    "schema_version": 1,
+    "score_scale_cp": 400.0,
+    "syzygy_path": "",
+    "threads": 1
+  },
+  "baselines": {
+    "test": {
+      "material_mean_mse": 0.16993948385459073,
+      "positions": 5122,
+      "training_material_means": {
+        "KRvK": 0.7755660115292534,
+        "KRvKR": 4.518643249625753e-19,
+        "KvK": 0.0,
+        "KvKR": -0.7755660115292545
+      },
+      "zero_prediction_mse": 0.265089214639293
+    },
+    "validation": {
+      "material_mean_mse": 0.17143763032941658,
+      "positions": 4922,
+      "training_material_means": {
+        "KRvK": 0.7755660115292534,
+        "KRvKR": 4.518643249625753e-19,
+        "KvK": 0.0,
+        "KvKR": -0.7755660115292545
+      },
+      "zero_prediction_mse": 0.2692891649667367
+    }
+  },
+  "bins": {
+    "black_advantage": "[-0.8,-0.2)",
+    "black_large": "[-1,-0.8)",
+    "near_equal": "[-0.2,0.2]",
+    "white_advantage": "(0.2,0.8]",
+    "white_large": "(0.8,1]"
+  },
+  "cache_hits": 1,
+  "code_sha256": {
+    "board_bitstrings.py": "28e81ea5a82ba3e86f422ebb75eb7924d50badeb496f99c9067ab66149ad6c2a",
+    "generate_training_data.py": "33ef7182a74f7b81df060cbc050c76fe7a5e39855658347468ae466afad95b49",
+    "position_types.py": "ee057f34b5b0c3312ad8d4b4d01289d67529281334053146a92e0459b6e560f9"
+  },
+  "distribution": {
+    "abs_score_at_least_0_95_count": 1128,
+    "abs_score_at_least_0_95_fraction": 0.02256,
+    "empty_bins": [],
+    "exact_endpoint_count": 1102,
+    "exact_endpoint_fraction": 0.02204,
+    "material_counts": {
+      "KRvK": 4000,
+      "KRvKR": 40000,
+      "KvK": 2000,
+      "KvKR": 4000
+    },
+    "positions": 50000,
+    "raw_evaluation_kinds": {
+      "cp": 46898,
+      "mate": 1102,
+      "terminal_draw": 2000
+    },
+    "score_bins": {
+      "black_advantage": 2248,
+      "black_large": 7495,
+      "near_equal": 30514,
+      "white_advantage": 2248,
+      "white_large": 7495
+    },
+    "sparse_bins_below_one_percent": [],
+    "turn_counts": {
+      "b": 25000,
+      "w": 25000
+    }
+  },
+  "encoding": {
+    "bitstring": {
+      "bits": 231,
+      "type": "standard"
+    },
+    "rook_bitstring": {
+      "bits": 35,
+      "type": "rook-endgame"
+    }
+  },
+  "engine": {
+    "author": "the Stockfish developers (see AUTHORS file)",
+    "name": "Stockfish 19"
+  },
+  "engine_provenance": {
+    "archive_sha256": "a1f0e3bcc5a6927a11fe6fc8e54a779754645f3c2bae2cf13420fd1957adaa77",
+    "binary_sha256": "8eed61129d1493c5d1f2fd9323f0c54c47ac49319911fbde18c6b9c87e8b13c5",
+    "download_url": "https://github.com/official-stockfish/Stockfish/releases/download/sf_19/stockfish-macos-universal.tar.gz",
+    "release": "https://github.com/official-stockfish/Stockfish/releases/tag/sf_19",
+    "source": "verified_release_archive"
+  },
+  "files": {
+    "test": {
+      "abs_score_at_least_0_95_count": 128,
+      "abs_score_at_least_0_95_fraction": 0.024990238188207732,
+      "bytes": 247653,
+      "empty_bins": [],
+      "exact_endpoint_count": 126,
+      "exact_endpoint_fraction": 0.024599765716516987,
+      "families": 2458,
+      "material_counts": {
+        "KRvK": 413,
+        "KRvKR": 4160,
+        "KvK": 136,
+        "KvKR": 413
+      },
+      "path": "test.jsonl.gz",
+      "positions": 5122,
+      "raw_evaluation_kinds": {
+        "cp": 4860,
+        "mate": 126,
+        "terminal_draw": 136
+      },
+      "score_bins": {
+        "black_advantage": 245,
+        "black_large": 752,
+        "near_equal": 3128,
+        "white_advantage": 245,
+        "white_large": 752
+      },
+      "sha256": "8b2625841ff2cfbc7c9f4e15aee4fb4b37348ae5c7f0efa25875e147c5e22214",
+      "sparse_bins_below_one_percent": [],
+      "turn_counts": {
+        "b": 2561,
+        "w": 2561
+      }
+    },
+    "train": {
+      "abs_score_at_least_0_95_count": 900,
+      "abs_score_at_least_0_95_fraction": 0.022524777254980477,
+      "bytes": 1772104,
+      "empty_bins": [],
+      "exact_endpoint_count": 878,
+      "exact_endpoint_fraction": 0.02197417158874762,
+      "families": 18935,
+      "material_counts": {
+        "KRvK": 3192,
+        "KRvKR": 31864,
+        "KvK": 1708,
+        "KvKR": 3192
+      },
+      "path": "train.jsonl.gz",
+      "positions": 39956,
+      "raw_evaluation_kinds": {
+        "cp": 37370,
+        "mate": 878,
+        "terminal_draw": 1708
+      },
+      "score_bins": {
+        "black_advantage": 1789,
+        "black_large": 5980,
+        "near_equal": 24418,
+        "white_advantage": 1789,
+        "white_large": 5980
+      },
+      "sha256": "2bbeadaee623e5d3671929cf322d598ee4ccbcc64a01dcf0a597f323e5b4a095",
+      "sparse_bins_below_one_percent": [],
+      "turn_counts": {
+        "b": 19978,
+        "w": 19978
+      }
+    },
+    "validation": {
+      "abs_score_at_least_0_95_count": 100,
+      "abs_score_at_least_0_95_fraction": 0.02031694433157253,
+      "bytes": 238868,
+      "empty_bins": [],
+      "exact_endpoint_count": 98,
+      "exact_endpoint_fraction": 0.019910605444941082,
+      "families": 2349,
+      "material_counts": {
+        "KRvK": 395,
+        "KRvKR": 3976,
+        "KvK": 156,
+        "KvKR": 395
+      },
+      "path": "validation.jsonl.gz",
+      "positions": 4922,
+      "raw_evaluation_kinds": {
+        "cp": 4668,
+        "mate": 98,
+        "terminal_draw": 156
+      },
+      "score_bins": {
+        "black_advantage": 214,
+        "black_large": 763,
+        "near_equal": 2968,
+        "white_advantage": 214,
+        "white_large": 763
+      },
+      "sha256": "5d3669c4940b05be12e1b3459c15b5ab5afec1e523b67df047397d784ae38095",
+      "sparse_bins_below_one_percent": [],
+      "turn_counts": {
+        "b": 2461,
+        "w": 2461
+      }
+    }
+  },
+  "limitations": [
+    "Engine estimates at a fixed node budget, not calibrated win probabilities.",
+    "Uniform legal placements are not a distribution of positions from human games.",
+    "Sampling weights balance occupied bins only; sparse/empty bins remain reported.",
+    "Score diversity and rook-endgame performance do not establish transfer to other pieces."
+  ],
+  "new_cached_pairs": 24999,
+  "pilot": {
+    "abs_score_at_least_0_95_count": 40,
+    "abs_score_at_least_0_95_fraction": 0.02,
+    "cached_pairs": 0,
+    "elapsed_seconds": 12.277264541000001,
+    "empty_bins": [],
+    "estimated_full_cold_analysis_seconds": 271.2473344750005,
+    "estimated_remaining_cold_analysis_seconds": 260.3974410960005,
+    "exact_endpoint_count": 38,
+    "exact_endpoint_fraction": 0.019,
+    "included_in_final_dataset": true,
+    "material_counts": {
+      "KRvK": 153,
+      "KRvKR": 1608,
+      "KvK": 86,
+      "KvKR": 153
+    },
+    "new_pairs": 1000,
+    "positions": 2000,
+    "raw_evaluation_kinds": {
+      "cp": 1876,
+      "mate": 38,
+      "terminal_draw": 86
+    },
+    "score_bins": {
+      "black_advantage": 85,
+      "black_large": 281,
+      "near_equal": 1268,
+      "white_advantage": 85,
+      "white_large": 281
+    },
+    "sparse_bins_below_one_percent": [],
+    "turn_counts": {
+      "b": 1000,
+      "w": 1000
+    }
+  },
+  "requested_counts": {
+    "KRvK": 4000,
+    "KRvKR": 40000,
+    "KvK": 2000,
+    "KvKR": 4000
+  },
+  "sampling": {
+    "augmentation": "color swap plus vertical reflection; score negated without reanalysis",
+    "castling": false,
+    "en_passant": false,
+    "history_dependent_draws": false,
+    "method": "uniform distinct-square placements conditioned on validity, then color mirrors"
+  },
+  "sampling_weights": {
+    "applied_to": "train_only",
+    "formula": "N_train / (occupied_bins * bin_count)",
+    "values_by_score_bin": {
+      "black_advantage": 4.466852990497484,
+      "black_large": 1.3363210702341137,
+      "near_equal": 0.3272667704152674,
+      "white_advantage": 4.466852990497484,
+      "white_large": 1.3363210702341137
+    }
+  },
+  "schema_version": 1,
+  "seed": 42,
+  "software": {
+    "python": "3.9.6",
+    "python_chess": "1.11.2"
+  },
+  "split": {
+    "family": "D4 geometry and color swap, ignoring turn",
+    "heldout_weights": false,
+    "method": "seeded SHA-256 family hash modulo 100",
+    "proportions": [
+      0.8,
+      0.1,
+      0.1
+    ]
+  },
+  "split_family_overlap": 0,
+  "target": {
+    "cp_formula": "tanh(white_centipawns / score_scale_cp)",
+    "engine_mate": "signed endpoint",
+    "nonterminal_draws": "retain engine evaluation",
+    "perspective": "white",
+    "score_scale_cp": 400.0,
+    "terminal_draw": 0
+  },
+  "validation": {
+    "color_mirrors": "passed",
+    "encoding_round_trips": "passed",
+    "positions_checked": 50000,
+    "terminal_labels_and_normalization": "passed",
+    "unique_rook_inputs": 50000,
+    "unique_standard_inputs": 50000
+  }
+}

@@ -2,6 +2,7 @@
 
 Standard positions use 231 bits. KING_ROOK_VS_KING positions use 28 bits:
 White king [6], White rook [captured][6], Black king [6], game state [9].
+ROOK_ENDGAME uses 35 bits and adds Black rook [captured][6] before game state.
 
 White's slots precede Black's. Each standard color uses this order: king, queen,
 a/h rooks, c/f bishops, b/g knights, then a-h pawns (by original square).
@@ -162,7 +163,7 @@ def _tracked_slot_positions(board: chess.Board, position_type: PositionType) -> 
 def board_to_bitstring(
     board: chess.Board, position_type: PositionType = PositionType.STANDARD,
 ) -> str:
-    """Return the complete position: 231 standard bits or 28 KING_ROOK_VS_KING bits."""
+    """Return a complete position in the selected 231-, 28-, or 35-bit format."""
     _validate_board(board, position_type)
     positions = _tracked_slot_positions(board, position_type)
     chunks = []
@@ -287,7 +288,7 @@ if __name__ == "__main__":
             result = decode_bitstring(args.decode, position_type)
         else:
             if args.fen is None and position_type != PositionType.STANDARD:
-                parser.error("An explicit FEN is required for king-rook-vs-king")
+                parser.error("An explicit FEN is required for reduced position types")
             if sys.stdin.isatty():
                 parser.error("Pipe the JSON output from legal_moves.py into this script")
             fen = chess.STARTING_FEN if args.fen is None else args.fen

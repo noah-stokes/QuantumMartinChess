@@ -8,6 +8,7 @@ import chess
 class PositionType(Enum):
     STANDARD = "standard"
     KING_ROOK_VS_KING = "king-rook-vs-king"
+    ROOK_ENDGAME = "rook-endgame"
 
     @property
     def piece_slots(self) -> tuple[tuple[bool, int, int], ...]:
@@ -42,6 +43,12 @@ _PIECE_SLOTS = {
         (chess.WHITE, chess.ROOK, chess.A1),
         (chess.BLACK, chess.KING, chess.E8),
     ),
+    PositionType.ROOK_ENDGAME: (
+        (chess.WHITE, chess.KING, chess.E1),
+        (chess.WHITE, chess.ROOK, chess.A1),
+        (chess.BLACK, chess.KING, chess.E8),
+        (chess.BLACK, chess.ROOK, chess.A8),
+    ),
 }
 
 
@@ -62,6 +69,10 @@ def _validate_piece_set(board: chess.Board, position_type: PositionType) -> None
                 for slot_color, slot_type, _ in position_type.piece_slots
             )
             if len(board.pieces(piece_type, color)) > allowed_count:
+                if position_type == PositionType.ROOK_ENDGAME:
+                    raise ValueError(
+                        "rook-endgame allows only both kings and at most one rook per color"
+                    )
                 raise ValueError(
                     "king-rook-vs-king allows only a White king, at most one White rook, "
                     "and a Black king"
